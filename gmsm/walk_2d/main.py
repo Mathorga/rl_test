@@ -1,13 +1,12 @@
+from walker_2d import Walker2D
 import sys
 import pickle
 from tqdm import tqdm
-from cliff_walker import CliffWalker
 import gymnasium as gym
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-env_id: str = "CliffWalking-v1"
 policy_file_path: str =  os.path.join(os.path.dirname(os.path.abspath(__file__)), "policy.pkl")
 
 def get_moving_avgs(arr, window, convolution_mode):
@@ -20,7 +19,7 @@ def get_moving_avgs(arr, window, convolution_mode):
 
 def plot_training(
     env: gym.Env,
-    agent: CliffWalker
+    agent: Walker2D
 ) -> None:
     # Smooth over a 500-episode window
     rolling_length = 500
@@ -63,13 +62,12 @@ def plot_training(
     plt.show()
 
 def train(
+    env: gym.Env,
     episodes_count: int = 1000
 ):
-    global env_id
     global policy_file_path
 
     # Create the environment.
-    env: gym.Env = gym.make(env_id)
     env = gym.wrappers.RecordEpisodeStatistics(
         env,
         buffer_length = episodes_count
@@ -78,7 +76,7 @@ def train(
     starting_epsilon: float = 1.0
 
     # Create the agent living in the environment.
-    agent: CliffWalker = CliffWalker(
+    agent: Walker2D = Walker2D(
         env = env,
         learning_rate = 0.001,
         starting_epsilon = starting_epsilon,
@@ -126,18 +124,11 @@ def train(
         agent = agent
     )
 
-def run():
-    global env_id
+def run(env: gym.Env):
     global policy_file_path
 
-    # Create the environment.
-    env: gym.Env = gym.make(
-        env_id,
-        render_mode = "human"
-    )
-
     # Create the agent living in the environment.
-    agent: CliffWalker = CliffWalker(
+    agent: Walker2D = Walker2D(
         env = env,
         policy_file_path = policy_file_path,
         # Make sure no exploration is done.
@@ -155,16 +146,27 @@ def run():
         done = terminated or truncated
 
 if __name__ == "__main__":
+    env_id: str = "CliffWalking-v1"
+    # env_id: str = "FrozenLake-v1"
+    run_env: gym.Env = gym.make(
+        env_id,
+        render_mode = "human",
+        is_slippery = False
+    )
+    train_env: gym.Env = gym.make(
+        env_id,
+        is_slippery = False
+    )
     if len(sys.argv) > 1:
         match sys.argv[1]:
             case "train":
                 if len(sys.argv) >= 3:
-                    train(int(sys.argv[2]))
+                    train(env = train_env, episodes_count= int(sys.argv[2]))
                 else:
-                    train(1000)
+                    train(env = train_env, episodes_count = 1000)
             case "run":
-                run()
+                run(env = run_env)
             case _:
-                run()
+                run(env = run_env)
     else:
-        run()
+        run(env = run_env)

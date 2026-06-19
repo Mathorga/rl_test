@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 import gymnasium as gym
 
-class CliffWalker:
+class Walker2D:
     def __init__(
         self,
         env: gym.Env,
