@@ -1,11 +1,12 @@
-from walker_2d import Walker2D
 import sys
+import os
 import pickle
-from tqdm import tqdm
-import gymnasium as gym
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+import gymnasium as gym
+from tqdm import tqdm
+
+from walker_2d import Walker2D
 
 policy_file_path: str =  os.path.join(os.path.dirname(os.path.abspath(__file__)), "policy.pkl")
 
